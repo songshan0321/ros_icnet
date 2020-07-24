@@ -1,0 +1,10 @@
+<launch>
+
+	<node name="ros_icnet" pkg="ros_icnet" type="ros_icnet.py" output="screen">
+		<param name="m_rate"  value="30.0" />
+		<param name="m_input_image_topic"  value="/pointgrey_cam/image_rect_color" />
+		<param name="m_output_image_topic"  value="/camera/segmentation" />
+		<param name="m_weight_path"  value="/proj/tf_ws/src/ros_icnet/model/weight/model_best.ckpt" />
+	</node>
+
+</launch>
