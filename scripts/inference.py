@@ -16,7 +16,6 @@ class Config(object):
                     'eval_size': [720, 960],
                     'eval_steps': 114}
 
-        # self.num_classes = 2
         self.infer_size = (720, 960, 3)
         self.is_training = is_training
         self.filter_scale = filter_scale
@@ -33,9 +32,15 @@ class ICNetInference:
     def infer(self, image):
         dim = (self.cfg.param['infer_size'][1], self.cfg.param['infer_size'][0])
         image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
-        return self.net.predict(image)
 
-    def process(self, image, result, alpha=0.3):
+        start_t = time.time()
+        result = self.net.predict(image)
+        duration = time.time() - start_t
+        
+        return result, duration
+
+    def process(self, image, result, detection_duration, alpha=0.3):
+        start_t = time.time()
         dim = (self.cfg.param['infer_size'][1], self.cfg.param['infer_size'][0])
         image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
         
@@ -45,6 +50,8 @@ class ICNetInference:
         result = (abs(result-1))
         result = np.uint8(result)
         output, boundary = self.extract_boundary_np(overlay, result)
+        process_duration = time.time() - start_t
+        output = self.render_image(output, detection_duration, process_duration)
 
         return output, boundary
 
@@ -64,3 +71,18 @@ class ICNetInference:
             image_draw = cv2.circle(image, (p[1],p[0]), 1, (255, 255, 0) , 5)
 
         return image_draw, unique_idx
+
+    def render_image(self, image, detection_duration, process_duration):
+        detection_fps = 1.0 / detection_duration
+        total_time = detection_duration + process_duration
+        total_fps = 1.0 / total_time
+
+        text1 = "Detection time: {:.2f} ms,   Detection FPS: {:.2f}".format(detection_duration*1000, detection_fps)
+        text2 = "Total time:     {:.2f} ms,       Total FPS: {:.2f}".format(total_time*1000, total_fps)
+        org1 = (int(image.shape[0]*0.05), int(image.shape[1]*0.05))
+        org2 = (int(image.shape[0]*0.05), int(image.shape[1]*0.10))
+
+        cv2.putText(image, text1, org1, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv2.LINE_AA)
+        cv2.putText(image, text2, org2, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv2.LINE_AA)
+
+        return image

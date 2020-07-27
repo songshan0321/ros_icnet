@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 import rospy
-import numpy as np
-import cv2
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 
@@ -33,8 +31,9 @@ class RosInference:
         while not rospy.is_shutdown():
 
             if self.image is not None:
-                result = self.inference.infer(self.image)
-                output_image, boundary = self.inference.process(self.image, result[0])
+                result, duration = self.inference.infer(self.image)
+                output_image, boundary = self.inference.process(self.image, result[0], duration)
+                print(boundary)
                 #TODO: pointcloud = self.create_pointcloud(boundary)
 
                 output_image = self.bridge.cv2_to_imgmsg(output_image)
