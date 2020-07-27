@@ -9,12 +9,9 @@ class Config(object):
 
     def __init__(self, is_training=False, filter_scale=1):
 
-        self.param = {'name': 'lbfreespace',
-                    'num_classes': 2,
+        self.param = {'num_classes': 2,
                     'ignore_label': 255,
-                    'infer_size': [720, 960],
-                    'eval_size': [720, 960],
-                    'eval_steps': 114}
+                    'infer_size': [720, 960]}
 
         self.infer_size = (720, 960, 3)
         self.is_training = is_training
@@ -106,11 +103,11 @@ class ICNetInference:
         P = np.array(camera_info.P).reshape((3,4))
 
         ####### Hardcode intrinsic matrix and z value
-        K[0] = P[0][:-1]
-        K[1] = P[1][:-1]
-        K[2] = P[2][:-1]
-        K[0][2] = 1080 / 2.18
-        K[1][2] = 1440 / 2
+        # K[0] = P[0][:-1]
+        # K[1] = P[1][:-1]
+        # K[2] = P[2][:-1]
+        # K[0][2] = 1080 / 2.18
+        # K[1][2] = 1440 / 2
 
         z = - 0.875
         #######

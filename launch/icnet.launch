@@ -1,5 +1,7 @@
 <launch>
 
+	<node name="tf_camera_link" pkg="tf" type="static_transform_publisher" args="0.34 0.0 0.90 0 0 0 /base_link /camera_link 40"/>
+
 	<node name="ros_icnet" pkg="ros_icnet" type="main.py" output="screen">
 		<param name="m_rate"  value="30.0" />
 		<param name="m_input_camera_info_topic"  value="/pointgrey_cam/camera_info" />
