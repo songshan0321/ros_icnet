@@ -1,14 +1,16 @@
 <launch>
 
-	<node name="tf_camera_link" pkg="tf" type="static_transform_publisher" args="0.34 0.0 0.90 0 0 0 /base_link /camera_link 40"/>
+	<node name="tf_camera_link" pkg="tf" type="static_transform_publisher" args="0.34 0.0 0.90 0 0 0 base_link pointgrey_cam_link 40"/>
 
 	<node name="ros_icnet" pkg="ros_icnet" type="main.py" output="screen">
 		<param name="m_rate"  value="30.0" />
+		<param name="m_camera_frame"  value="pointgrey_cam_link" />
 		<param name="m_input_camera_info_topic"  value="/pointgrey_cam/camera_info" />
 		<param name="m_input_image_topic"  value="/pointgrey_cam/image_rect_color" />
 		<param name="m_output_image_topic"  value="/pointgrey_cam/segmentation" />
 		<param name="m_output_pointcloud_topic"  value="/pointgrey_cam/pointcloud" />
 		<param name="m_weight_path"  value="/proj/tf_ws/src/ros_icnet/model/weight/model_best.ckpt" />
+		<param name="m_median_filter"  value="true" />
 	</node>
 
 </launch>

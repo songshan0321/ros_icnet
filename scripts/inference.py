@@ -16,6 +16,7 @@ class Config(object):
         self.infer_size = (720, 960, 3)
         self.is_training = is_training
         self.filter_scale = filter_scale
+        self.median_filter = True
         self.camera_info = None
 
 class ICNetInference:
@@ -51,7 +52,7 @@ class ICNetInference:
 
         output, boundary = self.extract_boundary_np(overlay, result)
         if self.camera_info is not None:
-            points = self.deproject_points(boundary, self.camera_info)
+            points = self.deproject_points(boundary, self.camera_info, median_filter=self.median_filter)
         process_duration = time.time() - start_t
 
         output = self.render_image(output, infer_duration, process_duration)
@@ -91,7 +92,7 @@ class ICNetInference:
 
         return image
 
-    def deproject_points(self, image_points, camera_info):
+    def deproject_points(self, image_points, camera_info, median_filter=False):
 
         scale_u = self.cfg.param['infer_size'][0] / float(camera_info.height)
         scale_v = self.cfg.param['infer_size'][1] / float(camera_info.width)
@@ -113,10 +114,20 @@ class ICNetInference:
         #######
         K_scaled = np.dot(S, K)
         KI_scaled = np.linalg.inv(K_scaled)
+        
+        if median_filter:
+            buffer_size = 3
+            filtered_points = []
+            for i in range(0, len(image_points), buffer_size):
+                if i + buffer_size > len(image_points):
+                    filtered_points.append(np.median(image_points[i:], axis=0))
+                else:
+                    filtered_points.append(np.median(image_points[i:i+buffer_size-1], axis=0))
+        else:
+            filtered_points = image_points
 
         world_points = []
-
-        for point in image_points:
+        for point in filtered_points:
             if point[0] == self.cfg.param['infer_size'][0]-1:
                 continue
             image_pt = np.transpose(np.array([point[0], point[1], 1]))
@@ -125,13 +136,11 @@ class ICNetInference:
             y1 = - world_pt[1]
             z1 = - world_pt[0]
 
-            t = z / z1
+            t = z/z1
             x = x1*t
             y = y1*t
-
-            dist = np.sqrt(x*x + y*y)
-
-            if x > 0 and dist <= 8:
+            
+            if x > 0 and x <= 5 and abs(y) <= 5:
                 world_points.append([x,y,z])
     
         return world_points

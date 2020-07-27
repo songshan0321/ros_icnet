@@ -39,6 +39,3 @@ def _infer_preprocess(img, shape, swap_channel=False):
     img, n_shape = _check_input(img)
         
     return img, o_shape, n_shape
-
-    
-    
